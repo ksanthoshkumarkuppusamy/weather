@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="HandheldFriendly" content="true" />
+  <meta property="og:title" content="Weather App" />
+  <meta property="og:description" content="Live Weather Updates" />
+  <meta property="og:site_name" content="Weather App" />
+  <meta property="og:image" content="./assets/img/logo.png" />
+
+  <!-- Bulma -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="./assets/css/bulma-switch.min.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/js/all.min.js" integrity="sha512-UwcC/iaz5ziHX7V6LjSKaXgCuRRqbTp1QHpbOJ4l1nw2/boCfZ2KlFIqBUA/uRVF0onbREnY9do8rM/uT/ilqw==" crossorigin="anonymous"></script>
+
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Website Properties -->
+  <title>Weather App</title>
+  <link rel="icon" href="./assets/icon/logo.ico" />
+</head>
+
+<body>
+  <!-- Title Section -->
+  <div class="section pl-0 pr-0">
+    <div class="level-item">
+      <figure class="image is-64x64 mr-3">
+        <img src="./assets/img/logo.png">
+      </figure>
+      <h1 class="title has-text-light">Weather App</h1>
+    </div>
+  </div>
+
+  <!-- Weather Section -->
+  <div class="section has-text-centered pt-0">
+    <div class="columns is-centered">
+      <div class="column pt-0">
+        <div class="section pt-0 pb-1">
+          <figure class="image is-inline-block">
+            <img id="weatherIcon" src="./assets/img/error.png" />
+          </figure>
+        </div>
+        <div class="section has-text-centered p-0 pt-4 pb-2">
+          <div class="columns">
+            <div class="column is-4">
+              <p class="is-size-3 is-size-5-tablet is-size-5-mobile" id="time">Current Time: N/A</p>
+            </div>
+            <div class="column is-4">
+              <p class="is-size-3 is-size-5-tablet is-size-5-mobile" id="temperature">Temperature: N/A</p>
+            </div>
+            <div class="column is-4">
+              <p class="is-size-3 is-size-5-tablet is-size-5-mobile" id="prediction">Prediction: N/A</p>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <p class="is-size-3 is-size-5-tablet is-size-5-mobile" id="location">Location: N/A</p>
+        </div>
+        <div class="section has-text-centered pt-4 pb-0">
+          <div class="level">
+            <div class="level-item">
+              <div class="field ml-3">
+                <div class="control has-icons-right">
+                  <input class="input is-medium" type="text" placeholder="City, Province">
+                  <span class="icon is-right">
+                    <i class="far fa-compass"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="level-item">
+              <div class="select is-medium">
+                <select>
+                  <option>Theme</option>
+                  <option>Red</option>
+                  <option>Blue</option>
+                  <option>Purple</option>
+                  <option>Pink</option>
+                  <option>Dark</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./scripts/script.js"></script>
+  <script>
+    // JavaScript code goes here
+    // ...
+
+    /**
+     * Set Location
+     */
+    $('.input').on('keyup', (e) => {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        setLocation($('.input').val());
+        loadWeather();
+      }
+    });
+
+    $('.input').focusout(() => {
+      setLocation($('.input').val());
+      loadWeather();
+    });
+
+    /**
+     * Change location
+     */
+    function changeLocation() {
+      $('.field').css('display', 'block');
+      $('#location').html('Location: ');
+      $('#locationLevel').css('display', 'none');
+    }
+
+    /**
+     * Retrieve time
+     */
+    function getTime() {
+      let date = new Date();
+      let h = getHour();
+      let m = date.getMinutes();
+      let s = date.getSeconds();
+
+      h = h < 10 ? '0' + h : h;
+      m = m < 10 ? '0' + m : m;
+      s = s < 10 ? '0' + s : s;
+
+      if (h == 0) h = 12;
+
+      $('#time').html(`Current Time: ${h}:${m}:${s} ${getSession(h)}`);
+    }
+
+    /**
+     * Get Session
+     */
+    function getSession() {
+      const timezone = localStorage.getItem('timezone');
+      const d = new Date();
+      const h = d.getUTCHours() + parseInt(timezone);
+      let s = 'AM';
+
+      if (h > 11 && h < 24) {
+        s = 'PM';
+      }
+
+      return s;
+    }
+
+    /**
+     * Get Hour
+     */
+    function getHour() {
+      const timezone = localStorage.getItem('timezone');
+      const d = new Date();
+      let h = d.getUTCHours() + parseInt(timezone);
+      if (h < 0) {
+        h = 12 - h;
+      }
+      if (h == 0) {
+        h = 12;
+      }
+
+      if (h > 23) {
+        h = h - 24;
+      }
+
+      if (h > 12) {
+        h = h - 12;
+      }
+      return h;
+    }
+
+    /**
+     * Fetch API and load weather
+     */
+    function loadWeather() {
+      let location;
+      if (localStorage.getItem('location') != undefined) {
+        location = localStorage.getItem('location');
+      } else {
+        location ='Toronto, Ontario';
+        localStorage.setItem('location', location);
+      }
+      $('#location').html('Location: ' + location);
+      let temperature, prediction;
+      // Safe to store key with limit (free tier)
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=1e77fb69d26c242a76402146e8484da8`
+      )
+        .then((response) => {
+          response.json().then((data) => {
+            if (response.status != 404) {
+              localStorage.setItem('timezone', data.timezone / 3600);
+              temperature = data.main.temp;
+              prediction = data.weather[0].main;
+              $('#temperature').html('Temperature: ' + Math.round(temperature - 273.15) + ' °C');
+              $('#prediction').html('Prediction: ' + prediction);
+              switch (prediction) {
+                case 'Sunny':
+                case 'Clear':
+                  if ((getHour() <= 6 && getSession() == 'AM') || (getHour() >= '18' && getSession() == 'PM')) {
+                    document.getElementById('weatherIcon').src = './assets/img/moon.png';
+                  } else {
+                    document.getElementById('weatherIcon').src = './assets/img/sunny.png';
+                  }
+                  break;
+                case 'Thunderstorm':
+                  document.getElementById('weatherIcon').src = './assets/img/thunderstorm.png';
+                  break;
+                case 'Clouds':
+                  document.getElementById('weatherIcon').src = './assets/img/cloudy.png';
+                  break;
+                case 'Rain':
+                  document.getElementById('weatherIcon').src = './assets/img/raining.png';
+                  break;
+                case 'Snow':
+                  document.getElementById('weatherIcon').src = './assets/img/snowing.png';
+                  break;
+                case 'Mist':
+                  document.getElementById('weatherIcon').src = './assets/img/mist.png';
+                  break;
+              }
+              setInterval(getTime, 1000);
+            }
+          });
+        })
+        .catch(() => {
+          $('#weatherIcon').attr('src', './assets/img/error.png');
+          $('#temperature').innerHTML = 'Temperature: N/A';
+          $('#prediction').innerHTML = 'Prediction: N/A';
+          $('#location').html('Location: N/A');
+        });
+    }
+
+    /**
+     * Set and save theme
+     */
+    $('select').change(() => {
+      setTheme($('select option:selected').text());
+    });
+
+    function setTheme(theme) {
+      switch (theme) {
+        case 'Red':
+          $('html').css(
+            'background',
+            'linear-gradient(#2d142c, #510a32, #801336, #c72c41, #ee4540) no-repeat'
+          );
+          $('body').css(
+            'background',
+            'linear-gradient(#2d142c, #510a32, #801336, #c72c41, #ee4540) no-repeat'
+          );
+          localStorage.setItem('theme', 'Red');
+          break;
+        case 'Blue':
+          $('html').css('background', 'linear-gradient(#380036, #0cbaba) no-repeat');
+          $('body').css('background', 'linear-gradient(#380036, #0cbaba) no-repeat');
+          localStorage.setItem('theme', 'Blue');
+          break;
+        case 'Purple':
+          $('html').css(
+            'background',
+            'linear-gradient(#5271c4 0%, #b19fff 48%, #aa76b8 100%) no-repeat'
+          );
+          $('body').css(
+            'background',
+            'linear-gradient(#5271c4 0%, #b19fff 48%, #aa76b8 100%) no-repeat'
+          );
+          localStorage.setItem('theme', 'Purple');
+          break;
+        case 'Pink':
+          $('html').css('background', 'linear-gradient(#df89b5 0%, #83a0c8 100%) no-repeat');
+          $('body').css('background', 'linear-gradient(#df89b5 0%, #83a0c8 100%) no-repeat');
+          localStorage.setItem('theme', 'Pink');
+          break;
+        case 'Dark':
+          $('html').css('background', '#1b1b26');
+          $('body').css('background', '#1b1b26');
+          localStorage.setItem('theme', 'Dark');
+          break;
+        default:
+          $('html').css(
+            'background',
+            'linear-gradient(#2d142c, #510a32, #801336, #c72c41, #ee4540) no-repeat'
+          );
+          $('body').css(
+            'background',
+            'linear-gradient(#2d142c, #510a32, #801336, #c72c41, #ee4540) no-repeat'
+          );
+          localStorage.setItem('theme', 'Red');
+          break;
+      }
+    }
+
+    /**
+     * Load theme
+     */
+    function loadTheme() {
+      if (localStorage.getItem('theme') != undefined) {
+        setTheme(localStorage.getItem('theme'));
+      } else {
+        setTheme('Red');
+      }
+    }
+
+    /**
+     * Set location in localStorage
+     */
+    function setLocation(location) {
+      localStorage.setItem('location', location);
+    }
+
+    /**
+     * Load location
+     */
+    function loadLocation() {
+      let location;
+      if (localStorage.getItem('location') != undefined) {
+        location = localStorage.getItem('location');
+      } else {
+        location = 'Toronto, Ontario';
+      }
+
+      $('.input').val(location);
+    }
+
+    loadTheme();
+    loadLocation();
+    loadWeather();
+    setInterval(loadWeather, 600000);
+  </script>
+</body>
+
+</html>
